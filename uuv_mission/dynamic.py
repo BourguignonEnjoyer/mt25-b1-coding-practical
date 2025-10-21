@@ -2,7 +2,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 import numpy as np
 import matplotlib.pyplot as plt
-from .terrain import generate_reference_and_limits
+from terrain import generate_reference_and_limits
+import os
+
 
 class Submarine:
     def __init__(self):
@@ -75,8 +77,20 @@ class Mission:
 
     @classmethod
     def from_csv(cls, file_name: str):
-        # You are required to implement this method
-        pass
+        file_name = os.getcwd() + "/" +  file_name
+        csv_array = np.genfromtxt(file_name, delimiter=",", skip_header=1)
+        #note how the first line of the CSV file given has names, ignore this
+        print(csv_array)
+        data_len = csv_array.__len__()
+        reference = np.zeros(data_len)
+        cave_height = np.zeros(data_len)
+        cave_depth = np.zeros(data_len)
+        for i in range(0, data_len):
+            reference[i] = csv_array[i][0]
+            cave_height[i] = csv_array[i][1]
+            cave_depth[i] = csv_array[i][2]
+
+        return cls(reference, cave_height, cave_depth)
 
 
 class ClosedLoop:
