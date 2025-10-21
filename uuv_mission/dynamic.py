@@ -92,19 +92,18 @@ class Mission:
         return cls(reference, cave_height, cave_depth)
 
 class Controller:
-    def __init__(self, sub, duration):
+    def __init__(self, sub):
         self.proportional = 0.15
         self.derivative = 0.6
         self.timestep = sub.dt
-        self.duration = duration
-        self.data = np.zeros(duration)
+        self.error = 0
+        self.old_error = 0
 
     def perform(self, time_index, reference, position):
         e = reference - position
-        self.data[time_index] = e
-        u = self.proportional * e
-        if(time_index > 0):
-            u = u + self.derivative * (e - self.data[time_index - 1])
+        self.old_error = self.error
+        u = self.proportional * e + self.derivative * (e - self.old_error)
+        self.error = e
 
         return u
 
