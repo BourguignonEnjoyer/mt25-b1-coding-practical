@@ -80,7 +80,6 @@ class Mission:
         file_name = os.getcwd() + "/" +  file_name
         csv_array = np.genfromtxt(file_name, delimiter=",", skip_header=1)
         #note how the first line of the CSV file given has names, ignore this
-        print(csv_array)
         data_len = csv_array.__len__()
         reference = np.zeros(data_len)
         cave_height = np.zeros(data_len)
@@ -92,6 +91,22 @@ class Mission:
 
         return cls(reference, cave_height, cave_depth)
 
+class Controller:
+    def __init__(self, sub, duration):
+        self.proportional = 0.15
+        self.derivative = 0.6
+        self.timestep = sub.dt
+        self.duration = duration
+        self.data = np.zeros(duration)
+
+    def perform(self, time_index, reference, position):
+        e = reference - position
+        self.data[time_index] = e
+        u = self.proportional * e
+        if(time_index > 0):
+            u = u + self.derivative * (e - self.data[time_index - 1])
+
+        return u
 
 class ClosedLoop:
     def __init__(self, plant: Submarine, controller):
@@ -111,7 +126,8 @@ class ClosedLoop:
         for t in range(T):
             positions[t] = self.plant.get_position()
             observation_t = self.plant.get_depth()
-            # Call your controller here
+            controller_output = self.controller.perform(t, mission.reference[t], observation_t)
+            actions[t] = controller_output
             self.plant.transition(actions[t], disturbances[t])
 
         return Trajectory(positions)
