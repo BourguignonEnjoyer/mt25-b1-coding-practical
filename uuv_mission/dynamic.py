@@ -93,7 +93,7 @@ class Mission:
 
 class Controller:
     def __init__(self, sub):
-        self.proportional = 0.15
+        self.proportional = 0.1
         self.derivative = 0.6
         self.timestep = sub.dt
         self.error = 0
